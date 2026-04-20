@@ -11,9 +11,9 @@ def run_backtest(environment, agent, agent_name):
     episode_done      = False
 
     while not episode_done:
-        action, _state          = agent.predict(observation, deterministic=True)
+        action, _state   = agent.predict(observation, deterministic=True)
         observation, reward, terminated, truncated, info = environment.step(action)
-        episode_done            = terminated or truncated
+        episode_done     = terminated or truncated
 
         portfolio_values.append(info["portfolio_value"])
         weights_over_time.append(info["weights"].copy())
@@ -54,9 +54,9 @@ def compute_metrics(daily_returns):
     negative_returns = daily_returns[daily_returns < 0]
 
     if len(negative_returns) > 0:
-        downside_vol   = float(np.std(negative_returns)) * np.sqrt(252)
+        downside_vol  = float(np.std(negative_returns)) * np.sqrt(252)
     else:
-        downside_vol   = 1e-10
+        downside_vol  = 1e-10
 
     sortino_ratio  = (annual_return - 0.02) / downside_vol
 
@@ -110,14 +110,13 @@ def compare_results(list_of_results):
 
 def plot_results(list_of_results, assets, initial_balance=100_000.0):
 
-    colors     = ["#1D9E75", "#534AB7", "#BA7517"]
-    figure, axes = plt.subplots(1, 3, figsize=(15, 5))
+    colors         = ["#1D9E75", "#534AB7", "#BA7517"]
+    figure, axes   = plt.subplots(1, 3, figsize=(15, 5))
     figure.suptitle("Portfolio Optimizer - Results", fontsize=14, fontweight="bold")
 
-    # Panel 1 : portfolio value over time
     for result, color in zip(list_of_results, colors):
-        portfolio_values  = np.array(result["portfolio_values"])
-        indexed_values    = portfolio_values / initial_balance * 100
+        portfolio_values = np.array(result["portfolio_values"])
+        indexed_values   = portfolio_values / initial_balance * 100
         axes[0].plot(indexed_values, label=result["name"], color=color, linewidth=2)
 
     axes[0].axhline(100, color="gray", linestyle="--", linewidth=0.8)
@@ -126,7 +125,6 @@ def plot_results(list_of_results, assets, initial_balance=100_000.0):
     axes[0].set_ylabel("Value")
     axes[0].legend()
 
-    # Panel 2 : drawdown over time
     for result, color in zip(list_of_results, colors):
         portfolio_values = np.array(result["portfolio_values"])
         running_peak     = np.maximum.accumulate(portfolio_values)
@@ -140,7 +138,6 @@ def plot_results(list_of_results, assets, initial_balance=100_000.0):
     axes[1].set_ylabel("Drawdown (%)")
     axes[1].legend()
 
-    # Panel 3 : final weights of the first RL agent
     first_result  = list_of_results[0]
     final_weights = np.array(first_result["weights_over_time"][-1])
 

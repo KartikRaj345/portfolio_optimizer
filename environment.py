@@ -18,15 +18,15 @@ class PortfolioEnv(gym.Env):
     ):
         super().__init__()
 
-        self.dataframe           = dataframe.copy()
-        self.assets              = assets
-        self.number_of_assets    = len(assets)
-        self.window_size         = window_size
-        self.initial_balance     = initial_balance
-        self.transaction_cost    = transaction_cost
-        self.max_drawdown_limit  = max_drawdown_limit
+        self.dataframe            = dataframe.copy()
+        self.assets               = assets
+        self.number_of_assets     = len(assets)
+        self.window_size          = window_size
+        self.initial_balance      = initial_balance
+        self.transaction_cost     = transaction_cost
+        self.max_drawdown_limit   = max_drawdown_limit
         self.daily_risk_free_rate = risk_free_rate / 252
-        self.features_per_asset  = 6
+        self.features_per_asset   = 6
 
         market_history_size  = self.window_size * self.number_of_assets * self.features_per_asset
         current_weights_size = self.number_of_assets
@@ -133,13 +133,13 @@ class PortfolioEnv(gym.Env):
         else:
             random_start = earliest_possible_start
 
-        self.current_step         = random_start
-        self.episode_start        = random_start
-        self.portfolio_value      = self.initial_balance
-        self.peak_portfolio_value = self.initial_balance
-        self.current_weights      = np.ones(self.number_of_assets, dtype=np.float32) / self.number_of_assets
+        self.current_step            = random_start
+        self.episode_start           = random_start
+        self.portfolio_value         = self.initial_balance
+        self.peak_portfolio_value    = self.initial_balance
+        self.current_weights         = np.ones(self.number_of_assets, dtype=np.float32) / self.number_of_assets
         self.portfolio_value_history = [self.initial_balance]
-        self.episode_is_done      = False
+        self.episode_is_done         = False
 
         first_observation = self._build_observation()
         info              = self._get_info()
