@@ -110,10 +110,11 @@ def compare_results(list_of_results):
 
 def plot_results(list_of_results, assets, initial_balance=100_000.0):
 
-    colors         = ["#1D9E75", "#534AB7", "#BA7517"]
-    figure, axes   = plt.subplots(1, 3, figsize=(15, 5))
+    colors       = ["#1D9E75", "#534AB7", "#BA7517"]
+    figure, axes = plt.subplots(1, 4, figsize=(20, 5))
     figure.suptitle("Portfolio Optimizer - Results", fontsize=14, fontweight="bold")
 
+    # --- Plot 1: Portfolio Value ---
     for result, color in zip(list_of_results, colors):
         portfolio_values = np.array(result["portfolio_values"])
         indexed_values   = portfolio_values / initial_balance * 100
@@ -125,6 +126,7 @@ def plot_results(list_of_results, assets, initial_balance=100_000.0):
     axes[0].set_ylabel("Value")
     axes[0].legend()
 
+    # --- Plot 2: Drawdown ---
     for result, color in zip(list_of_results, colors):
         portfolio_values = np.array(result["portfolio_values"])
         running_peak     = np.maximum.accumulate(portfolio_values)
@@ -138,17 +140,30 @@ def plot_results(list_of_results, assets, initial_balance=100_000.0):
     axes[1].set_ylabel("Drawdown (%)")
     axes[1].legend()
 
-    first_result  = list_of_results[0]
-    final_weights = np.array(first_result["weights_over_time"][-1])
+    # --- Plot 3: PPO Final Weights ---
+    ppo_result  = list_of_results[0]
+    ppo_weights = np.array(ppo_result["weights_over_time"][-1])
 
-    axes[2].bar(assets, final_weights, color=colors[0], edgecolor="white")
+    axes[2].bar(assets, ppo_weights, color=colors[0], edgecolor="white")
     axes[2].axhline(1 / len(assets), color="gray", linestyle="--", linewidth=0.8, label="Equal weight")
-    axes[2].set_title(f"{first_result['name']} - Final Weights")
+    axes[2].set_title(f"{ppo_result['name']} - Final Weights")
     axes[2].set_ylabel("Weight")
-    axes[2].set_ylim(0, 0.35)
+    axes[2].set_ylim(0, 0.40)
     axes[2].legend()
+    axes[2].tick_params(axis="x", rotation=30)
 
-    plt.xticks(rotation=30)
+    # --- Plot 4: A2C Final Weights ---
+    a2c_result  = list_of_results[1]
+    a2c_weights = np.array(a2c_result["weights_over_time"][-1])
+
+    axes[3].bar(assets, a2c_weights, color=colors[1], edgecolor="white")
+    axes[3].axhline(1 / len(assets), color="gray", linestyle="--", linewidth=0.8, label="Equal weight")
+    axes[3].set_title(f"{a2c_result['name']} - Final Weights")
+    axes[3].set_ylabel("Weight")
+    axes[3].set_ylim(0, 0.40)
+    axes[3].legend()
+    axes[3].tick_params(axis="x", rotation=30)
+
     plt.tight_layout()
     plt.savefig("results.png", dpi=150, bbox_inches="tight")
     print("Plot saved to results.png")

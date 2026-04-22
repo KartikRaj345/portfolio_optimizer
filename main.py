@@ -1,13 +1,13 @@
 from data_loader import fetch_real_data, train_val_test_split
 from environment import PortfolioEnv
-from agent       import PPOTrainer, EqualWeightAgent, RandomAgent
+from agent       import PPOTrainer, A2CTrainer, EqualWeightAgent
 from backtester  import run_backtest, compare_results, plot_results
 
 ASSETS          = ["AAPL", "MSFT", "GOOGL", "AMZN", "JPM", "GS", "JNJ", "XOM"]
 INITIAL_BALANCE = 100_000.0
 TRAINING_STEPS  = 200_000
-START_DATE      = "2018-01-01"
-END_DATE        = "2024-01-01"
+START_DATE      = "2010-01-01"
+END_DATE        = "2025-01-01"
 
 
 def make_env(dataframe):
@@ -36,19 +36,23 @@ def main():
     test_environment  = make_env(test_dataframe)
 
     print("\nStep 3 : Training PPO agent ...")
-    trainer = PPOTrainer(train_environment, eval_env=val_environment, log_dir="./logs")
-    model   = trainer.train(total_timesteps=TRAINING_STEPS)
+    ppo_trainer = PPOTrainer(train_environment, eval_env=val_environment, log_dir="./logs")
+    ppo_model   = ppo_trainer.train(total_timesteps=TRAINING_STEPS)
+
+    print("\nStep 3b : Training A2C agent ...")
+    a2c_trainer = A2CTrainer(train_environment, log_dir="./logs")
+    a2c_model   = a2c_trainer.train(total_timesteps=TRAINING_STEPS)
 
     print("\nStep 4 : Running backtests ...")
     all_results = []
 
-    ppo_result          = run_backtest(test_environment, model,                         "PPO Agent")
+    ppo_result          = run_backtest(test_environment, ppo_model,                     "PPO Agent")
+    a2c_result          = run_backtest(test_environment, a2c_model,                     "A2C Agent")
     equal_weight_result = run_backtest(test_environment, EqualWeightAgent(len(ASSETS)), "Equal Weight")
-    random_result       = run_backtest(test_environment, RandomAgent(len(ASSETS)),      "Random")
 
     all_results.append(ppo_result)
+    all_results.append(a2c_result)
     all_results.append(equal_weight_result)
-    all_results.append(random_result)
 
     print("\nStep 5 : Comparing results ...")
     compare_results(all_results)
